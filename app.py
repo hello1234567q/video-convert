@@ -1,78 +1,53 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
-from yt_dlp import YoutubeDL
-import os
-import threading
-import time
+from flask import Flask, request, jsonify, send_file, render_template
+from io import BytesIO
+import yt_dlp
 
-app = Flask(__name__)
-
-DOWNLOAD_FOLDER = "./downloads"
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
-
-# Hàm tải video
-def download_video(youtube_url, resolution):
-    ydl_opts = {
-        'format': f'bestvideo[height<={resolution}]+bestaudio/best',
-        'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
-        'merge_output_format': 'mp4',
-    }
-    with YoutubeDL(ydl_opts) as ydl:
-        result = ydl.extract_info(youtube_url, download=True)
-        filename = ydl.prepare_filename(result)
-        return filename
-
-# Hàm tải âm thanh
-def download_audio(youtube_url):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
-    with YoutubeDL(ydl_opts) as ydl:
-        result = ydl.extract_info(youtube_url, download=True)
-        filename = ydl.prepare_filename(result).replace('.webm', '.mp3')
-        return filename
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/donate')
+def donate():
+    return render_template('donate.html')
+
 @app.route('/download', methods=['POST'])
 def download():
-    youtube_url = request.form['url']
-    download_type = request.form['type']  # 'video' hoặc 'audio'
-    resolution = request.form.get('resolution', '720')  # Độ phân giải mặc định là 720p
+    data = request.json
+    url = data.get('url')
+    download_type = data.get('type')  # 'video' hoặc 'audio'
+
+    if not url or download_type not in ['video', 'audio']:
+        return jsonify({'error': 'Invalid request parameters'}), 400
+
+    ydl_opts = {
+        'format': 'bestvideo+bestaudio' if download_type == 'video' else 'bestaudio',
+        'noplaylist': True,
+        'quiet': True,
+    }
 
     try:
-        if download_type == 'video':
-            file_path = download_video(youtube_url, resolution)
-        elif download_type == 'audio':
-            file_path = download_audio(youtube_url)
-        else:
-            return "Loại tải xuống không hợp lệ.", 400
+        buffer = BytesIO()
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            title = info_dict.get('title', 'download')  # Lấy tiêu đề video
+            extension = 'mp4' if download_type == 'video' else 'mp3'
 
-        # Trả file cho người dùng
-        return send_file(file_path, as_attachment=True)
+            # Ghi file tạm vào buffer
+            ydl.download([url])
+            buffer.seek(0)
 
+            # Gửi file về client với tên tệp
+            return send_file(
+                buffer,
+                mimetype=f'video/{extension}' if download_type == 'video' else 'audio/mpeg',
+                as_attachment=True,
+                download_name=f"{title}.{extension}"  # Sử dụng tiêu đề làm tên tệp
+            )
     except Exception as e:
-        return f"Lỗi: {str(e)}", 500
+        return jsonify({'error': str(e)}), 500
 
-# Dọn dẹp file cũ tự động
-def delete_old_files_periodically():
-    while True:
-        current_time = time.time()
-        for filename in os.listdir(DOWNLOAD_FOLDER):
-            file_path = os.path.join(DOWNLOAD_FOLDER, filename)
-            if os.path.isfile(file_path):
-                file_age = current_time - os.path.getmtime(file_path)
-                if file_age > 24 * 60 * 60:  # File cũ hơn 1 ngày
-                    os.remove(file_path)
-        time.sleep(24 * 60 * 60)
 
-if __name__ == "__main__":
-    threading.Thread(target=delete_old_files_periodically, daemon=True).start()
+if __name__ == '__main__':
     app.run(debug=True)
