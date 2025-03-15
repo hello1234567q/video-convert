@@ -1,0 +1,87 @@
+/* Toàn bộ body */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    text-align: center;
+}
+
+/* Tiêu đề */
+h1 {
+    color: #0070ba;
+    margin-top: 20px;
+}
+
+/* Form tải video */
+form {
+    display: inline-block;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 300px;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #0070ba;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #005c99;
+}
+
+/* Radio button */
+input[type="radio"] {
+    margin-right: 8px;
+}
+
+/* Liên kết */
+a {
+    color: #0070ba;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Nút hỗ trợ */
+button[style*="background-color: #f68b38"] {
+    margin-left: 10px;
+}
+
+/* Danh sách liên hệ */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin: 5px 0;
+}
+
+/* Phần tử khác */
+p {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 10px 0;
+}
