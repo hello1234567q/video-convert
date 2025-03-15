@@ -4,33 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Downloader</title>
-    <link rel="stylesheet" href="/statics/index.css">
+    <link rel="stylesheet" href="/static/index.css">
 </head>
 <body>
     <div class="container">
         <h1>YouTube Downloader</h1>
-        <form action="/download" method="POST">
-            <label for="url">YouTube URL:</label>
-            <input type="text" id="url" name="url" placeholder="Nhập URL YouTube" required>
-
-            <label for="type">Loại tải xuống:</label>
-            <select id="type" name="type" required>
-                <option value="video">Video</option>
-                <option value="audio">Âm thanh</option>
-            </select>
-
-            <div id="resolution-container">
-                <label for="resolution">Độ phân giải (chỉ dành cho video):</label>
-                <select id="resolution" name="resolution">
-                    <option value="1080">1080p</option>
-                    <option value="720" selected>720p</option>
-                    <option value="480">480p</option>
-                    <option value="360">360p</option>
+        <form id="downloadForm">
+            <div class="form-group">
+                <label for="url">YouTube URL:</label>
+                <input type="text" id="url" name="url" required placeholder="Enter YouTube URL">
+            </div>
+            <div class="form-group">
+                <label for="type">Download Type:</label>
+                <select id="type" name="type" required>
+                    <option value="video">Video</option>
+                    <option value="audio">Audio</option>
                 </select>
             </div>
-
-            <button type="submit">Tải xuống</button>
+            <button type="submit" id="submitBtn">Download</button>
         </form>
+        <div class="message" id="message"></div>
     </div>
+    <script src="/static/index.js"></script>
+<footer>
+	<p>&copy; COPYRIGHT 2024-2025</p>
+	<p><a href="/donate">donate for us</a></p>
+</footer>
 </body>
 </html>
